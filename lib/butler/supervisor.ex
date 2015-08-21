@@ -7,7 +7,7 @@ defmodule Butler.Supervisor do
 
   def init(:ok) do
     children = [
-      worker(Butler.Bot, [[name: Butler.Bot]])
+      worker(Butler.Slack.Client, [[name: Butler.Slack.Client]])
     ]
 
     supervise(children, strategy: :one_for_one)
