@@ -1,17 +1,21 @@
 defmodule Butler.Cowsay do
   use Butler.Ears
 
-  respond("cowsay") do
-    cowsay(message)
-  end
-
+  # maybe do something like:
+  # hear("moo", state) do
   hear("moo") do
-    cowsay("moo")
+    cowsay("moo", state)
   end
 
-  defp cowsay(msg) do
+  # maybe do something like:
+  # respond("cowsay", message, state) do
+  respond("cowsay") do
+    cowsay(message, state)
+  end
+
+  defp cowsay(msg, state) do
     {response, 0} = System.cmd("cowsay", [msg])
-    {:reply, {:code, response}}
+    {:reply, {:code, response}, state}
   end
 
 end

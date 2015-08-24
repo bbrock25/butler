@@ -1,54 +1,57 @@
 defmodule Butler.Ears do
-  use Behaviour
-
-  defcallback listen(msg :: tuple, state :: list) :: tuple
 
   @doc false
   defmacro __using__(_opts) do
     quote location: :keep do
       import unquote(__MODULE__)
+      use GenEvent
       @before_compile unquote(__MODULE__)
     end
   end
 
-
   @doc false
   defmacro __before_compile__(_env) do
     quote do
-      use GenEvent
-      @behaviour Butler.Ears
+      @doc false
+      def listen(msg, state) do
+        default_reply(msg, state)
+      end
+
+      @doc false
+      defp default_reply(msg, state) do
+        {:noreply, msg, state}
+      end
 
       def handle_event(message, state) do
-        case listen(message, state) do
-          {:reply, reply, new_state} ->
-            IO.puts reply
-            {:ok, new_state}
-          {:noreply, msg, new_state} ->
-            IO.puts "no message"
-            {:ok, new_state}
-          _                          ->
-            IO.puts "something wonky happened"
-            {:ok, state}
+        {response, reply, new_state} = listen(message, state)
+
+        case response do
+          :reply -> IO.puts elem(reply, 1)
+          :noreply -> IO.puts "No reply for: #{elem(reply, 1)}"
+          _ -> IO.puts "Something wonky happened..."
         end
+
+        {:ok, new_state}
       end
+
     end
   end
 
   defmacro respond(command, body) do
     quote do
-      def listen({unquote(command), var!(message)}, state) do
-        Tuple.append(unquote(body[:do]), state)
+      def listen({unquote(command), var!(message)}, var!(state)) do
+        unquote(body[:do])
       end
     end
   end
 
   defmacro hear(phrase, body) do
     quote do
-      def listen({:hear, message}, state) do
+      def listen({:hear, message}, var!(state)) do
         if Regex.match?(~r/#{unquote(phrase)}/, message) do
-          Tuple.append(unquote(body[:do]), state)
+          unquote(body[:do])
         else
-          {:noreply, message, state}
+          {:noreply, message, var!(state)}
         end
       end
     end
