@@ -21,9 +21,13 @@ Quick sanity check:
 
 send a direct message to your butler bot from your slack, here are a few that
 will generate a response (if and only if you have cowsay installed)
-'''
+```
 butler cowsay I AM THE GIT MASTER
-'''
+  ^     ^     ^
+  ^     ^     all the arguments
+  ^     references the plugin
+  calls butler
+```
 
 You can investigate the plugin running here in lib/butler/plugins/cowsay.ex
 Also, there is another sample plugin under lib/butler/plugins/test_count.ex
